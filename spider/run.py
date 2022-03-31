@@ -5,6 +5,7 @@ from zhconv import convert
 from Fetch import fetch
 from data import *
 import _pcr_data
+import time
 
 UnavailableChara = {
     1000,   # 未知角色
@@ -20,27 +21,26 @@ UnavailableChara = {
 }
 
 start = datetime.now()
-path = 'C:\\Users\cwx_x\Documents\workSpace\python\pcr_wiki\spider\chromedriver.exe'#此处更改为你存放chromedriver的地址
+#path = '"D:\\code\py\spider\chromedriver.exe"'#此处更改为你存放chromedriver的地址
 opt = Options()
 opt.add_argument('--headless')
-opt.add_argument('--disk-cache-dir=C:\\Users\cwx_x\Documents\workSpace\python\pcr_wiki\spider\cache')#此处更改为你想存放缓存的地址
+opt.add_argument('--disk-cache-dir=D:\code\py\spider\cache')#此处更改为你想存放缓存的地址
 opt.add_argument('–disk-cache-size=134217728')#缓存最大128Mb
 opt.add_argument('--disable-javascript')
 opt.add_argument('--disable-images')
 opt.add_argument('--disable-plugins')
 opt.add_argument('--ignore-certificate-errors') #忽略证书错误
 opt.add_argument('--ignore-ssl-errors') #忽略证书错误
-driver = webdriver.Chrome(executable_path=path, options=opt)
+driver = webdriver.Chrome(executable_path="./chromedriver.exe",chrome_options=opt)
 
 try:
     for idx, names in _pcr_data.CHARA_NAME.items():
-        if idx >= 1801 and idx <= 1806 and idx not in UnavailableChara:# 批量更新，自行替换为更新范围
-        # if idx == 1156 and idx not in UnavailableChara:# 单条更新，此处数字更改为想要爬取的角色id
+        if idx >= 1801 and idx <= 1808 and idx not in UnavailableChara:# 批量更新，自行替换为更新范围
+        #if idx == 1207 and idx not in UnavailableChara:# 单条更新，此处数字更改为想要爬取的角色id
             name_zh = names[0].replace('(','（').replace(')','）')
-            name = convert(f'{name_zh}', 'zh-hant').replace('憐','怜')
+            name = convert(f'{name_zh}', 'zh-tw').replace('憐','怜').replace('裡','里')
             # 特殊：怜（萬聖節）
             driver.get(f'https://pcredivewiki.tw/Character/Detail/{name}')
-
             print(driver.title)
             if("undefined" in driver.title ):
                 driver.get(f'https://pcredivewiki.tw/Character/Detail/{name_zh}')
@@ -51,7 +51,6 @@ try:
                     print(driver.title)
 
             info = fetch(driver)
-
             Info.replace(
                 id=idx,
                 name=info['info']['name'],
@@ -78,7 +77,7 @@ try:
                     num = skill['skill_num'],
                     effect = skill['skill_effect'],
                 ).execute()
-            
+
             Kizuna.delete().where(Kizuna.id == idx).execute()
             for i in info['kizuna']:
                 for j in info['kizuna'][i]:
@@ -106,13 +105,14 @@ try:
                         max_value = prop['max_value'],
                     ).execute()
 
-            time = datetime.now()
-            t = time - start
+            time1 = datetime.now()
+            t = time1 - start
             print(f'用时：{t}，已更新编号{idx}{name_zh}角色数据')
+            
         # else:
             # print('跳过npc角色')
 except Exception as ex:
     print(ex)
-    print('更新出错')
+    print(str(idx)+'  更新出错')
 finally:
     driver.quit()

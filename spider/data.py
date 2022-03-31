@@ -1,6 +1,6 @@
 import peewee as pw
 
-db = pw.SqliteDatabase('C:\\Users\cwx_x\Documents\workSpace\python\pcr_wiki\wiki\data.db')#填写你要更新的data.db的路径
+db = pw.SqliteDatabase('data.db')#填写你要更新的data.db的路径
 
 class Info(pw.Model):
     id = pw.IntegerField()
